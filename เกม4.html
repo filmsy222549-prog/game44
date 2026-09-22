@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมที่ 4: นักสืบข่าว ตรวจสอบก่อนแชร์</title>
+    <!-- Google Fonts: Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .game-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .game-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Game Body */
+        .game-body {
+            padding: 30px;
+            flex: 1;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Welcome Screen */
+        .welcome-content {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .welcome-content i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .welcome-content h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .welcome-content p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            line-height: 1.6;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Mission Screen */
+        .mission-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .mission-number {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* News Card */
+        .news-card {
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .news-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .news-source-avatar {
+            width: 45px;
+            height: 45px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .news-meta h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .news-meta span {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .news-content p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--dark);
+        }
+
+        /* Workspace Grid (Drag & Drop) */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .box-container {
+            background: #f8fafc;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+        }
+
+        .source-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-content: flex-start;
+            flex: 1;
+        }
+
+        .drop-zone {
+            flex: 1;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-content: flex-start;
+            position: relative;
+        }
+
+        .drop-zone.drag-over {
+            background: #f0fdf4;
+            border-color: var(--success);
+        }
+
+        .drop-placeholder {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Clue Chips (Draggable) */
+        .clue-chip {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clue-chip:active {
+            cursor: grabbing;
+        }
+
+        .clue-chip:hover {
+            background: #e0e7ff;
+            transform: translateY(-2px);
+        }
+
+        /* Action Footer */
+        .mission-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Feedback Modal/Box */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.correct {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+
+        .feedback-box.incorrect {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .feedback-box h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Result Screen */
+        .result-content {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .result-content i {
+            font-size: 4rem;
+            color: var(--warning);
+            margin-bottom: 15px;
+        }
+
+        .result-content h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="game-header">
+            <div class="game-title">
+                <h1><i class="fa-solid fa-shield-halved"></i> นักสืบข่าว: ตรวจสอบก่อนแชร์</h1>
+            </div>
+            <div class="game-stats" id="game-stats" style="display: none;">
+                <div class="stat-badge"><i class="fa-solid fa-star"></i> คะแนน: <span id="score-display">0</span></div>
+                <div class="stat-badge"><i class="fa-solid fa-clock"></i> เวลา: <span id="timer-display">60</span>s</div>
+            </div>
+        </header>
+
+        <!-- Body -->
+        <div class="game-body">
+            
+            <!-- หน้าต้อนรับ (Welcome Screen) -->
+            <div id="welcome-screen" class="screen active">
+                <div class="welcome-content">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    <h2>พร้อมเป็นนักสืบข่าวตัวจริงหรือยัง?</h2>
+                    <p>ฝึกทักษะการคิดวิเคราะห์ ตรวจสอบข้อเท็จจริง และแยกแยะข่าวปลอม (Fake News) ก่อนที่คุณจะกดแชร์ให้ผู้อื่นต่อ!</p>
+                    <button class="btn" onclick="startGame()"><i class="fa-solid fa-play"></i> เริ่มต้นภารกิจ</button>
+                </div>
+            </div>
+
+            <!-- หน้าเล่นเกม (Mission Screen) -->
+            <div id="mission-screen" class="screen">
+                <div class="mission-info">
+                    <span class="mission-number" id="mission-title">ภารกิจที่ 1/3</span>
+                    <span id="mission-category" style="color: var(--gray); font-weight: 500;">ประเภท: ข่าวสุขภาพ</span>
+                </div>
+
+                <!-- ตัวข่าว -->
+                <div class="news-card">
+                    <div class="news-header">
+                        <div class="news-source-avatar" id="news-avatar"><i class="fa-solid fa-newspaper"></i></div>
+                        <div class="news-meta">
+                            <h3 id="news-source-name">สำนักข่าวสุขภาพดี</h3>
+                            <span id="news-time">โพสต์เมื่อ 2 ชั่วโมงที่แล้ว</span>
+                        </div>
+                    </div>
+                    <div class="news-content">
+                        <p id="news-text">เนื้อหาข่าวจะแสดงที่นี่...</p>
+                    </div>
+                </div>
+
+                <!-- พื้นที่ลากวาง (Drag & Drop Workspace) -->
+                <div class="workspace-grid">
+                    <!-- กล่องคำใบ้ต้นทาง -->
+                    <div class="box-container">
+                        <div class="box-title"><i class="fa-solid fa-puzzle-piece"></i> เบาะแส/หลักฐานทั้งหมด</div>
+                        <div class="source-box" id="source-box" ondragover="allowDrop(event)" ondrop="dropToSource(event)">
+                            <!-- เบาะแสจะถูกเติมด้วย JS -->
+                        </div>
+                    </div>
+
+                    <!-- กล่องตรวจสอบปลายทาง -->
+                    <div class="box-container">
+                        <div class="box-title"><i class="fa-solid fa-clipboard-check"></i> ลากเบาะแสมาวางเพื่อตรวจสอบ</div>
+                        <div class="drop-zone" id="check-zone" ondragover="allowDrop(event)" ondragleave="removeDropStyle(event)" ondrop="dropToCheck(event)">
+                            <span class="drop-placeholder" id="drop-placeholder-text">ลากเบาะแสที่น่าสงสัยมาวางที่นี่</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- กล่องแสดงผลเฉลยประจำข้อ -->
+                <div class="feedback-box" id="feedback-box">
+                    <h4 id="feedback-title">ผลการตรวจสอบ</h4>
+                    <p id="feedback-desc">คำอธิบายเพิ่มเติม...</p>
+                </div>
+
+                <!-- ปุ่มควบคุมท้ายข้อ -->
+                <div class="mission-footer" style="margin-top: 20px;">
+                    <button class="btn" id="action-btn" onclick="checkAnswer()"><i class="fa-solid fa-check"></i> ตรวจสอบคำตอบ</button>
+                </div>
+            </div>
+
+            <!-- หน้าสรุปผล (Result Screen) -->
+            <div id="result-screen" class="screen">
+                <div class="result-content">
+                    <i class="fa-solid fa-award"></i>
+                    <h2>สรุปผลการปฏิบัติภารกิจ</h2>
+                    <p>คุณได้ผ่านการทดสอบทักษะการเป็นนักสืบข่าวเรียบร้อยแล้ว!</p>
+                    <div class="final-score" id="final-score-text">0 / 300 คะแนน</div>
+                    <button class="btn" onclick="restartGame()"><i class="fa-solid fa-rotate-right"></i> เล่นใหม่อีกครั้ง</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ฐานข้อมูลภารกิจข่าว
+        const missions = [
+            {
+                id: 1,
+                category: "ข่าวสุขภาพ",
+                sourceName: "เพจสุขภาพดีวิถีไทย",
+                avatarIcon: "fa-heart-pulse",
+                text: "ด่วน! กินมะนาวผสมน้ำอุ่นตอนเช้าติดต่อกัน 7 วัน ช่วยล้างพิษในลำไส้ และรักษาโรคมะเร็งให้หายขาดได้โดยไม่ต้องหาหมอ!",
+                clues: [
+                    { id: 'c1', text: "อ้างว่ารักษาหายขาดได้ทุกโรค", isCorrect: true },
+                    { id: 'c2', text: "ไม่มีงานวิจัยทางการแพทย์รองรับ", isCorrect: true },
+                    { id: 'c3', text: "มะนาวมีวิตามินซีสูงตามธรรมชาติ", isCorrect: false }
+                ],
+                explanation: "ถูกต้อง! ข่าวนี้เข้าข่าย Fake News เนื่องจากไม่มีหลักฐานทางการแพทย์ยืนยันว่ามะนาวผสมน้ำอุ่นสามารถรักษามะเร็งได้หายขาด"
+            },
+            {
+                id: 2,
+                category: "ข่าวเทคโนโลยี",
+                sourceName: "Tech News Daily",
+                avatarIcon: "fa-laptop-code",
+                text: "เตือนภัย! ชาร์จมือถือทิ้งไว้ข้ามคืน อาจทำให้แบตเตอรี่ระเบิดคามือถือได้จริง สำนักงานเทคโนโลยีออกมายืนยันแล้ว",
+                clues: [
+                    { id: 'c4', text: "สมาร์ทโฟนรุ่นใหม่มีระบบตัดไฟอัตโนมัติ", isCorrect: true },
+                    { id: 'c5', text: "ใช้คำพาดหัวชวนตกใจ (Clickbait)", isCorrect: true },
+                    { id: 'c6', text: "การชาร์จไฟมีความร้อนเกิดขึ้นได้ปกติ", isCorrect: false }
+                ],
+                explanation: "ถูกต้อง! มือถือสมัยใหม่มีระบบป้องกันการชาร์จเกิน ข่าวนี้จึงเป็นการตื่นตูมและบิดเบือนความจริงบางส่วน"
+            },
+            {
+                id: 3,
+                category: "ข่าวด่วน/เตือนภัย",
+                sourceName: "ศูนย์ต่อต้านข่าวปลอมประเทศไทย",
+                avatarIcon: "fa-triangle-exclamation",
+                text: "ประกาศเตือนภัยสึนามิถล่มชายฝั่งอ่าวไทยในอีก 3 ชั่วโมงข้างหน้า ขอให้ประชาชนอพยพด่วนที่สุด!",
+                clues: [
+                    { id: 'c7', text: "ขัดแย้งกับประกาศจากกรมอุตุนิยมวิทยา", isCorrect: true },
+                    { id: 'c8', text: "ไม่มีแหล่งข่าวอ้างอิงจากหน่วยงานราชการที่น่าเชื่อถือ", isCorrect: true },
+                    { id: 'c9', text: "ประเทศไทยตั้งอยู่ในจุดเสี่ยงแผ่นดินไหวบางพื้นที่", isCorrect: false }
+                ],
+                explanation: "ถูกต้อง! เป็นข่าวปลอมที่สร้างความตื่นตระหนก ควรตรวจสอบกับหน่วยงานทางการ เช่น กรมอุตุนิยมวิทยา ก่อนแชร์ต่อทุกครั้ง"
+            }
+        ];
+
+        let currentMissionIndex = 0;
+        let score = 0;
+        let timeLeft = 60; // กำหนดเวลาเริ่มต้น 60 วินาที
+        let timerInterval;
+        let draggedCard = null;
+
+        // ฟังก์ชันเริ่มเกม
+        function startGame() {
+            currentMissionIndex = 0;
+            score = 0;
+            timeLeft = 60;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('timer-display').innerText = timeLeft;
+            
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.remove('active');
+            document.getElementById('mission-screen').classList.add('active');
+            document.getElementById('game-stats').style.display = 'flex';
+
+            startTimer();
+            loadMission();
+        }
+
+        // ระบบจับเวลา
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("หมดเวลา! เกมสิ้นสุดลงแล้ว");
+                    showResult();
+                }
+            }, 1000);
+        }
+
+        // โหลดข้อมูลภารกิจแต่ละข้อ
+        function loadMission() {
+            const mission = missions[currentMissionIndex];
+            document.getElementById('mission-title').innerText = `ภารกิจที่ ${currentMissionIndex + 1}/${missions.length}`;
+            document.getElementById('mission-category').innerText = `ประเภท: ${mission.category}`;
+            document.getElementById('news-source-name').innerText = mission.sourceName;
+            document.getElementById('news-text').innerText = mission.text;
+            
+            const avatarContainer = document.getElementById('news-avatar');
+            avatarContainer.innerHTML = `<i class="fa-solid ${mission.avatarIcon}"></i>`;
+
+            // เคลียร์กล่องเบาะแสและรีเซ็ตสถานะ
+            const sourceBox = document.getElementById('source-box');
+            const checkZone = document.getElementById('check-zone');
+            sourceBox.innerHTML = '';
+            checkZone.innerHTML = '<span class="drop-placeholder" id="drop-placeholder-text">ลากเบาะแสที่น่าสงสัยมาวางที่นี่</span>';
+
+            // สุ่มสลับตำแหน่งเบาะแส
+            let shuffledClues = [...mission.clues].sort(() => Math.random() - 0.5);
+
+            shuffledClues.forEach(clue => {
+                const chip = document.createElement('div');
+                chip.className = 'clue-chip';
+                chip.draggable = true;
+                chip.id = clue.id;
+                chip.dataset.correct = clue.isCorrect;
+                chip.innerHTML = `<i class="fa-solid fa-tag"></i> ${clue.text}`;
+                
+                chip.addEventListener('dragstart', (e) => {
+                    draggedCard = e.target;
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                });
+
+                sourceBox.appendChild(chip);
+            });
+
+            // ซ่อนกล่อง Feedback และเปลี่ยนปุ่มกลับเป็นตรวจสอบ
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.style.display = 'none';
+            feedbackBox.className = 'feedback-box';
+            
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.innerHTML = `<i class="fa-solid fa-check"></i> ตรวจสอบคำตอบ`;
+            actionBtn.setAttribute('onclick', 'checkAnswer()');
+            actionBtn.style.display = 'inline-flex';
+        }
+
+        // ฟังก์ชัน Drag & Drop Events
+        function allowDrop(e) {
+            e.preventDefault();
+            const dropZone = e.target.closest('.drop-zone') || e.target.closest('.source-box');
+            if (dropZone && dropZone.classList.contains('drop-zone')) {
+                dropZone.classList.add('drag-over');
+            }
+        }
+
+        function removeDropStyle(e) {
+            const dropZone = e.target.closest('.drop-zone');
+            if (dropZone) {
+                dropZone.classList.remove('drag-over');
+            }
+        }
+
+        function dropToCheck(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('check-zone');
+            dropZone.classList.remove('drag-over');
+            
+            // ลบ Placeholder หากมีอยู่
+            const placeholder = document.getElementById('drop-placeholder-text');
+            if (placeholder) placeholder.remove();
+
+            if (draggedCard) {
+                dropZone.appendChild(draggedCard);
+                draggedCard = null;
+            }
+        }
+
+        function dropToSource(e) {
+            e.preventDefault();
+            const sourceBox = document.getElementById('source-box');
+            
+            if (draggedCard) {
+                sourceBox.appendChild(draggedCard);
+                draggedCard = null;
+                checkPlaceholders();
+            }
+        }
+
+        function checkPlaceholders() {
+            const checkZone = document.getElementById('check-zone');
+            const chips = checkZone.querySelectorAll('.clue-chip');
+            if (chips.length === 0 && !document.getElementById('drop-placeholder-text')) {
+                const placeholder = document.createElement('span');
+                placeholder.className = 'drop-placeholder';
+                placeholder.id = 'drop-placeholder-text';
+                placeholder.innerText = 'ลากเบาะแสที่น่าสงสัยมาวางที่นี่';
+                checkZone.appendChild(placeholder);
+            }
+        }
+
+        // ตรวจสอบคำตอบ
+        function checkAnswer() {
+            const checkZone = document.getElementById('check-zone');
+            const chipsInCheck = checkZone.querySelectorAll('.clue-chip');
+
+            if (chipsInCheck.length === 0) {
+                alert("กรุณาลากเบาะแสอย่างน้อย 1 ข้อมาวางในช่องตรวจสอบก่อนครับ!");
+                return;
+            }
+
+            // ตรวจสอบว่าเลือกถูกทั้งหมดหรือไม่ (เบาะแสที่เป็น isCorrect: true ต้องถูกเลือกมาทั้งหมด และไม่มีข้อที่ผิดพลาด)
+            let allCorrectChosen = true;
+            let hasWrongChoice = false;
+
+            chipsInCheck.forEach(chip => {
+                if (chip.dataset.correct === "false") {
+                    hasWrongChoice = true;
+                }
+            });
+
+            const mission = missions[currentMissionIndex];
+            const correctCluesCount = mission.clues.filter(c => c.isCorrect).length;
+            let currentCorrectCount = 0;
+
+            chipsInCheck.forEach(chip => {
+                if (chip.dataset.correct === "true") {
+                    currentCorrectCount++;
+                }
+            });
+
+            if (currentCorrectCount === correctCluesCount && !hasWrongChoice) {
+                score += 100;
+                document.getElementById('score-display').innerText = score;
+                showFeedback(true, mission.explanation);
+            } else {
+                showFeedback(false, "คำตอบยังไม่ถูกต้อง ลองวิเคราะห์เหตุผลและลักษณะของข่าวปลอมใหม่อีกครั้งนะครับ");
+            }
+        }
+
+        // แสดงผล Feedback
+        let isAnswerCheckedState = false;
+        function showFeedback(isSuccess, message) {
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackDesc = document.getElementById('feedback-desc');
+            const actionBtn = document.getElementById('action-btn');
+
+            feedbackBox.style.display = 'block';
+            if (isSuccess) {
+                feedbackBox.className = 'feedback-box correct';
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i> ถูกต้องเยี่ยมมาก!`;
+            } else {
+                feedbackBox.className = 'feedback-box incorrect';
+                feedbackTitle.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ยังไม่ถูกต้องนัก`;
+            }
+            feedbackDesc.innerText = message;
+
+            // เปลี่ยนปุ่มเป็นไปข้อถัดไป
+            currentMissionIndex++;
+            if (currentMissionIndex < missions.length) {
+                actionBtn.innerHTML = `<i class="fa-solid fa-arrow-right"></i> ภารกิจถัดไป`;
+                actionBtn.setAttribute('onclick', 'loadMission()');
+            } else {
+                actionBtn.innerHTML = `<i class="fa-solid fa-flag-checkered"></i> ดูผลคะแนนรวม`;
+                actionBtn.setAttribute('onclick', 'showResult()');
+            }
+        }
+
+        // แสดงหน้าสรุปผล
+        function showResult() {
+            clearInterval(timerInterval);
+            document.getElementById('mission-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            document.getElementById('game-stats').style.display = 'none';
+
+            document.getElementById('final-score-text').innerText = `${score} / ${missions.length * 100} คะแนน`;
+        }
+
+        function restartGame() {
+            startGame();
+        }
+    </script>
+</body>
+</html>
